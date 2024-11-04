@@ -1,0 +1,10 @@
+<h1>Create Quiz</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ quiz_form.as_p }}
+    <h3>Questions:</h3>
+    {% for form in question_formset %}
+        {{ form.as_p }}
+    {% endfor %}
+    <button type="submit">Create Quiz</button>
+</form>

@@ -1,0 +1,15 @@
+<h1>{{ quiz.title }} - Results</h1>
+<p>Participant: {{ participant_name }}</p>
+<p>Score: {{ score }}%</p>
+<h3>Your Answers:</h3>
+<ul>
+    {% for answer in participant_answers %}
+        <li>{{ answer.question.text }} - {{ "Correct" if answer.is_correct else "Incorrect" }}</li>
+    {% endfor %}
+</ul>
+<h3>All Participants:</h3>
+<ul>
+    {% for answer in all_answers %}
+        <li>{{ answer.participant_name }} - {{ "Correct" if answer.is_correct else "Incorrect" }}</li>
+    {% endfor %}
+</ul>

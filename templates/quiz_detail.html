@@ -1,0 +1,13 @@
+<h1>{{ quiz.title }}</h1>
+<p>Created by: {{ quiz.creator_name }}</p>
+<form method="post" action="{% url 'submit_answers' quiz.id %}">
+    {% csrf_token %}
+    <label>Enter your name:</label>
+    <input type="text" name="participant_name" required><br>
+    {% for question in quiz.questions.all %}
+        <h3>{{ question.text }}</h3>
+        <label><input type="radio" name="question_{{ question.id }}" value="True"> Correct</label>
+        <label><input type="radio" name="question_{{ question.id }}" value="False"> Incorrect</label><br>
+    {% endfor %}
+    <button type="submit">Submit Answers</button>
+</form>
