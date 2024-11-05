@@ -1,13 +1,37 @@
-<h1>{{ quiz.title }}</h1>
-<p>Created by: {{ quiz.creator_name }}</p>
-<form method="post" action="{% url 'submit_answers' quiz.id %}">
-    {% csrf_token %}
-    <label>Enter your name:</label>
-    <input type="text" name="participant_name" required><br>
-    {% for question in quiz.questions.all %}
-        <h3>{{ question.text }}</h3>
-        <label><input type="radio" name="question_{{ question.id }}" value="True"> Correct</label>
-        <label><input type="radio" name="question_{{ question.id }}" value="False"> Incorrect</label><br>
-    {% endfor %}
-    <button type="submit">Submit Answers</button>
-</form>
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Detail</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center text-primary">{{ quiz.title }}</h1>
+        <p class="text-center text-muted">Created by: {{ quiz.creator_name }}</p>
+        <form method="post" action="{% url 'submit_answers' quiz.id %}" class="p-4 bg-light rounded">
+            {% csrf_token %}
+            <label class="form-label">Enter your name:</label>
+            <input type="text" name="participant_name" required class="form-control mb-3">
+            {% for question in quiz.questions.all %}
+                <h3 class="mt-4">{{ question.text }}</h3>
+                <div class="form-check">
+                    <input type="radio" name="question_{{ question.id }}" value="True" class="form-check-input">
+                    <label class="form-check-label">Correct</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" name="question_{{ question.id }}" value="False" class="form-check-input">
+                    <label class="form-check-label">Incorrect</label>
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-success w-100 mt-4">Submit Answers</button>
+        </form>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>

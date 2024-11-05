@@ -1,10 +1,48 @@
-<h1>Create Quiz</h1>
-<form method="post">
-    {% csrf_token %}
-    {{ quiz_form.as_p }}
-    <h3>Questions:</h3>
-    {% for form in question_formset %}
-        {{ form.as_p }}
-    {% endfor %}
-    <button type="submit">Create Quiz</button>
-</form>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Quiz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center text-primary mb-4">Create Quiz</h1>
+        <form method="post" class="p-4 bg-light rounded">
+            {% csrf_token %}
+            {{ quiz_form.as_p }}
+            <h3 class="text-secondary mt-4">Questions:</h3>
+            <div id="questions-container">
+                <!-- Here, we’ll add questions dynamically with JavaScript -->
+                <div class="question-form mb-3" id="question-template">
+                    {{ question_formset.empty_form.as_p }}
+                </div>
+            </div>
+            <button type="button" id="add-question" class="btn btn-secondary mb-3">Add Next Question</button>
+            <button type="submit" class="btn btn-primary w-100 mt-4">Create Quiz</button>
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addQuestionButton = document.getElementById('add-question');
+            const questionsContainer = document.getElementById('questions-container');
+            let questionCount = 0;
+
+            addQuestionButton.addEventListener('click', function() {
+                questionCount++;
+                // Clone the empty question form and update its IDs and names
+                const newQuestion = document.getElementById('question-template').cloneNode(true);
+                newQuestion.removeAttribute('id');  // Remove the template ID
+                newQuestion.classList.add('question-item');
+                newQuestion.innerHTML = newQuestion.innerHTML.replace(/__prefix__/g, questionCount);
+                questionsContainer.appendChild(newQuestion);
+            });
+        });
+    </script>
+</body>
+</html>
