@@ -1,22 +1,17 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enter Your Name</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>Enter Name</title>
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to the Quiz Creator!</h1>
-        <p>Please enter your name to get started.</p>
-
-        <form method="post" action="{% url 'enter_name' %}">
+        <h2>Enter Your Name to Start Creating a Quiz</h2>
+        <form method="POST">
             {% csrf_token %}
-            <label for="participant_name">Your Name:</label>
-            <input type="text" id="participant_name" name="participant_name" required placeholder="Enter your name">
-            <button type="submit">Start Creating Quiz</button>
+            <input type="text" name="participant_name" placeholder="Your Name" required>
+            <button type="submit">Start Quiz Creation</button>
         </form>
     </div>
 </body>
