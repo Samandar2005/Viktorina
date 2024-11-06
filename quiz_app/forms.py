@@ -1,14 +1,12 @@
 from django import forms
-from .models import Quiz, Question
-
-
-class QuizForm(forms.ModelForm):
-    class Meta:
-        model = Quiz
-        fields = ['title', 'creator_name']
+from .models import Question
 
 
 class QuestionForm(forms.ModelForm):
     class Meta:
         model = Question
-        fields = ['text', 'correct_answer']
+        fields = ['text', 'is_true']
+        widgets = {
+            'text': forms.TextInput(attrs={'placeholder': 'Savol matni...'}),
+            'is_true': forms.RadioSelect(choices=[(True, 'Rost'), (False, 'Yolg‘on')])
+        }

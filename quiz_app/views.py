@@ -1,88 +1,82 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
 from .models import Quiz, Question, Answer
-from .forms import QuizForm, QuestionForm
-from django.db.models import Count
+from .forms import QuestionForm
+import uuid
+from django.http import JsonResponse
+from django.urls import reverse
+import json
 
 
-def enter_participant_name(request):
-    # Step 1: User enters their name before creating a quiz
-    if request.method == "POST":
-        participant_name = request.POST.get('participant_name')
-        return redirect('create_quiz', participant_name=participant_name)
-    return render(request, 'enter_name.html')
+
+def create_quiz(request):
+    if request.method == 'POST':
+        creator_name = request.POST.get('creator_name')
+        if creator_name:
+            quiz = Quiz.objects.create(creator_name=creator_name, link_id=str(uuid.uuid4()))
+            return redirect('add_question', quiz_id=quiz.id)
+    return render(request, 'create_quiz.html')
 
 
-def create_quiz(request, participant_name):
-    # Create a quiz and add questions sequentially
-    quiz, created = Quiz.objects.get_or_create(
-        creator_name=participant_name,
-        defaults={'title': 'Untitled Quiz'}
-    )
-
-    if request.method == "POST":
-        question_form = QuestionForm(request.POST)
-
-        if question_form.is_valid():
-            question = question_form.save(commit=False)
-            question.quiz = quiz
-            question.save()
-
-            # If fewer than 10 questions, allow adding another question
-            if quiz.questions.count() < 10:
-                return render(request, 'create_quiz.html', {
-                    'question_form': QuestionForm(),
-                    'quiz': quiz
-                })
-            # If 10 questions, redirect to the quiz detail page with generated URL
-            return redirect('quiz_detail', quiz_id=quiz.id)
-    else:
-        question_form = QuestionForm()
-
-    return render(request, 'create_quiz.html', {
-        'question_form': question_form,
-        'quiz': quiz
-    })
-
-
-def quiz_detail(request, quiz_id):
-    # Display the quiz for participants to answer questions
+def add_question(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id)
-    return render(request, 'quiz_detail.html', {'quiz': quiz})
+    if quiz.questions.count() >= 10:
+        return redirect('quiz_link', quiz_id=quiz.id)
+
+    form = QuestionForm(request.POST or None)
+    if form.is_valid():
+        question = form.save(commit=False)
+        question.quiz = quiz
+        question.save()
+        if quiz.questions.count() >= 10:
+            return redirect('quiz_link', quiz_id=quiz.id)
+        return redirect('add_question', quiz_id=quiz.id)
+
+    return render(request, 'add_question.html', {'form': form, 'quiz': quiz})
 
 
-def submit_answers(request, quiz_id):
-    # Participants submit answers for the quiz
+def quiz_link(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id)
-
-    if request.method == "POST":
-        participant_name = request.POST.get('participant_name')
-
-        for question in quiz.questions.all():
-            answer = request.POST.get(f'question_{question.id}')
-            is_correct = (answer == 'True') == question.correct_answer
-            Answer.objects.create(
-                question=question,
-                participant_name=participant_name,
-                is_correct=is_correct
-            )
-
-        return redirect('quiz_result', quiz_id=quiz.id, participant_name=participant_name)
-
-    return render(request, 'quiz_detail.html', {'quiz': quiz})
+    link = request.build_absolute_uri(reverse('take_quiz', args=[quiz.link_id]))
+    return render(request, 'quiz_link.html', {'link': link})
 
 
-def quiz_result(request, quiz_id, participant_name):
-    # Show results for the participant
+def take_quiz(request, link_id):
+    quiz = get_object_or_404(Quiz, link_id=link_id)
+    questions = quiz.questions.all()  # Retrieve all questions for the quiz
+
+    if request.method == 'POST':
+        # Parse JSON data from the request
+        data = json.loads(request.body)
+        user_name = data.get('user_name')
+        answers = data.get('answers', {})
+        score = 0
+
+        # Calculate the score
+        for question in questions:
+            user_answer = answers.get(f'question_{question.id}')
+            correct_answer = 'True' if question.is_true else 'False'
+            print(f"Question: {question.id}, User Answer: {user_answer}, Correct Answer: {correct_answer}")
+
+            if user_answer == correct_answer:
+                score += 1  # Increment score if the answer is correct
+
+        # Log final score
+        print(f"Final score for {user_name}: {score}")
+
+        # Save the score to the Answer model
+        Answer.objects.create(quiz=quiz, user_name=user_name, score=score)
+
+        # Redirect to results page with the user's score and others' scores
+        redirect_url = reverse('quiz_result', args=[quiz.id, user_name])
+        return JsonResponse({'success': True, 'redirect_url': redirect_url})
+
+    return render(request, 'take_quiz.html', {'quiz': quiz, 'questions': questions})
+
+
+
+def quiz_result(request, quiz_id, user_name):
     quiz = get_object_or_404(Quiz, id=quiz_id)
-    participant_answers = Answer.objects.filter(question__quiz=quiz, participant_name=participant_name)
-    correct_count = participant_answers.filter(is_correct=True).count()
-    total_questions = quiz.questions.count()
-    score = (correct_count / total_questions) * 100
+    user_score = get_object_or_404(Answer, quiz=quiz, user_name=user_name).score
+    all_scores = Answer.objects.filter(quiz=quiz).order_by('-score')
+    return render(request, 'quiz_result.html', {'user_score': user_score, 'all_scores': all_scores})
 
-    return render(request, 'quiz_result.html', {
-        'quiz': quiz,
-        'score': score,
-        'participant_name': participant_name,
-        'participant_answers': participant_answers,
-    })

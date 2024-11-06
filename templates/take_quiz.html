@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Take Quiz</title>
+    <style>
+        /* Hide all questions initially */
+        .question {
+            display: none;
+        }
+        /* Show the active question */
+        .active-question {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Take the Quiz</h1>
+
+    <!-- User name input form -->
+    <div id="name-form">
+        <form id="start-form">
+            <label for="name">Enter your name:</label>
+            <input type="text" id="name" name="name" required>
+            <button type="button" onclick="startQuiz()">Start</button>
+        </form>
+    </div>
+
+    <!-- Quiz questions form -->
+    <div id="quiz-form" style="display: none;">
+        {% for question in questions %}
+            <div class="question" id="question-{{ forloop.counter0 }}">
+                <p>{{ question.text }}</p>
+                <button onclick="submitAnswer({{ forloop.counter0 }}, true)">True</button>
+                <button onclick="submitAnswer({{ forloop.counter0 }}, false)">False</button>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        const totalQuestions = {{ questions|length }};
+    </script>
+    <!-- JavaScript functions -->
+    <script>
+        let currentQuestion = 0;
+        let userName = "";
+        let answers = {};  // Store answers
+
+        function startQuiz() {
+            userName = document.getElementById("name").value;
+            if (userName) {
+                document.getElementById("name-form").style.display = "none";
+                document.getElementById("quiz-form").style.display = "block";
+                showQuestion(currentQuestion);  // Show the first question
+            } else {
+                alert("Please enter your name.");
+            }
+        }
+
+        function showQuestion(index) {
+            const questions = document.getElementsByClassName("question");
+
+            // Hide all questions first
+            for (let i = 0; i < questions.length; i++) {
+                questions[i].classList.remove("active-question");
+                questions[i].style.display = "none";
+            }
+
+            // Show the current question
+            if (index < questions.length) {
+                questions[index].style.display = "block";
+                questions[index].classList.add("active-question");
+            }
+        }
+
+        function submitAnswer(index, answer) {
+            // Save the answer and log it
+            answers[`question_${index}`] = answer ? 'True' : 'False';
+            console.log(`Question ${index} answer: ${answers[`question_${index}`]}`);
+
+            // Hide the current question
+            document.getElementById(`question-${index}`).classList.remove("active-question");
+
+            // Move to the next question
+            currentQuestion++;
+            if (currentQuestion < totalQuestions) {
+                showQuestion(currentQuestion);
+            } else {
+                finishQuiz();
+            }
+        }
+
+
+        function finishQuiz() {
+            alert("Quiz finished! Redirecting to your results...");
+
+            // Send the data to the server
+            fetch(window.location.href, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'  // Add CSRF token for security
+                },
+                body: JSON.stringify({
+                    user_name: userName,
+                    answers: answers
+                })
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      window.location.href = data.redirect_url;  // Redirect to the results page
+                  } else {
+                      alert("An error occurred. Please try again.");
+                  }
+              });
+        }
+
+    </script>
+
+
+</body>
+</html>

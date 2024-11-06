@@ -2,25 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz Results</title>
 </head>
 <body>
-    <div class="container">
-        <h2>Quiz Results for {{ participant_name }}</h2>
-        <p>Your Score: {{ score }}%</p>
+    <h1>Quiz Results</h1>
+    <p>Your Score: {{ user_score }}</p>
 
-        <h3>Details:</h3>
-        <ul>
-            {% for answer in participant_answers %}
-                <li>
-                    <strong>Question:</strong> {{ answer.question.text }}<br>
-                    <strong>Your Answer:</strong> {{ answer.is_correct|yesno:"Correct,Incorrect" }}
-                </li>
-            {% endfor %}
-        </ul>
+    <h2>All Participants' Scores:</h2>
+    <ul>
+        {% for answer in all_scores %}
+            <li>{{ answer.user_name }}: {{ answer.score }}</li>
+        {% endfor %}
+    </ul>
 
-        <a href="{% url 'enter_participant_name' %}">Take another quiz</a>
-    </div>
+    <a href="{% url 'create_quiz' %}">Create a new quiz</a>
 </body>
 </html>

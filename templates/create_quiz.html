@@ -1,31 +1,6 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Quiz</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container mt-5">
-        <h1 class="text-center text-primary mb-4">Create Quiz</h1>
-        <form method="post" class="p-4 bg-light rounded">
-            {% csrf_token %}
-            <h3 class="text-secondary mt-4">Enter Questions ({{ quiz.questions.count }} / 10):</h3>
-            <div id="questions-container">
-                <div class="question-form mb-3">
-                    {{ question_form.as_p }}
-                </div>
-            </div>
-            {% if quiz.questions.count < 10 %}
-                <button type="submit" class="btn btn-secondary w-100 mt-4">Add Next Question</button>
-            {% endif %}
-            {% if quiz.questions.count == 10 %}
-                <a href="{% url 'quiz_detail' quiz.id %}" class="btn btn-primary w-100 mt-4">Quiz Completed! View Quiz</a>
-            {% endif %}
-        </form>
-    </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<form method="post">
+    {% csrf_token %}
+    <label for="creator_name">Ismingiz:</label>
+    <input type="text" name="creator_name" required>
+    <button type="submit">Yaratish</button>
+</form>
