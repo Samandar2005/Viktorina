@@ -11,9 +11,10 @@ class Quiz(models.Model):
 
 
 class Question(models.Model):
+    text = models.TextField()
+    is_true = models.BooleanField()  # Boolean field for True/False answers
     quiz = models.ForeignKey(Quiz, related_name='questions', on_delete=models.CASCADE)
-    text = models.CharField(max_length=255)
-    is_true = models.BooleanField()
+
 
     def __str__(self):
         return self.text

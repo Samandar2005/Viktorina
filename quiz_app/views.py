@@ -7,7 +7,6 @@ from django.urls import reverse
 import json
 
 
-
 def create_quiz(request):
     if request.method == 'POST':
         creator_name = request.POST.get('creator_name')
@@ -42,41 +41,59 @@ def quiz_link(request, quiz_id):
 
 def take_quiz(request, link_id):
     quiz = get_object_or_404(Quiz, link_id=link_id)
-    questions = quiz.questions.all()  # Retrieve all questions for the quiz
+    questions = quiz.questions.all()
 
     if request.method == 'POST':
-        # Parse JSON data from the request
         data = json.loads(request.body)
         user_name = data.get('user_name')
         answers = data.get('answers', {})
         score = 0
 
-        # Calculate the score
+        # Log the received answers for debugging
+        print(f"User answers received: {answers}")
+
+        # Calculate score based on correct answers
         for question in questions:
             user_answer = answers.get(f'question_{question.id}')
             correct_answer = 'True' if question.is_true else 'False'
-            print(f"Question: {question.id}, User Answer: {user_answer}, Correct Answer: {correct_answer}")
 
-            if user_answer == correct_answer:
-                score += 1  # Increment score if the answer is correct
+            # Log each question and comparison result
+            print(f"Question ID: {question.id}, User Answer: {user_answer}, Correct Answer: {correct_answer}")
 
-        # Log final score
-        print(f"Final score for {user_name}: {score}")
+            if str(user_answer) == correct_answer:  # Ensure both are strings for comparison
+                score += 1
 
-        # Save the score to the Answer model
-        Answer.objects.create(quiz=quiz, user_name=user_name, score=score)
+        # Log final score before saving
+        print(f"Final calculated score: {score}")
 
-        # Redirect to results page with the user's score and others' scores
+        # Store or update the score in the database
+        answer, created = Answer.objects.get_or_create(
+            quiz=quiz,
+            user_name=user_name,
+            defaults={'score': score}
+        )
+
+        if not created:
+            answer.score = score
+            answer.save()
+
+        # Redirect to the results page
         redirect_url = reverse('quiz_result', args=[quiz.id, user_name])
         return JsonResponse({'success': True, 'redirect_url': redirect_url})
 
     return render(request, 'take_quiz.html', {'quiz': quiz, 'questions': questions})
 
 
-
 def quiz_result(request, quiz_id, user_name):
     quiz = get_object_or_404(Quiz, id=quiz_id)
-    user_score = get_object_or_404(Answer, quiz=quiz, user_name=user_name).score
-    all_scores = Answer.objects.filter(quiz=quiz).order_by('-score')
-    return render(request, 'quiz_result.html', {'user_score': user_score, 'all_scores': all_scores})
+    try:
+        user_score = Answer.objects.get(quiz=quiz, user_name=user_name).score
+        print(f"User score found: {user_score}")  # Debugging
+    except Answer.DoesNotExist:
+        user_score = None
+        print(f"No score found for user: {user_name}")  # Debugging
 
+    all_scores = Answer.objects.filter(quiz=quiz).order_by('-score')
+    print(f"All scores: {[f'{a.user_name}: {a.score}' for a in all_scores]}")  # Debugging
+
+    return render(request, 'quiz_result.html', {'user_score': user_score, 'all_scores': all_scores})

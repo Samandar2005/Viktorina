@@ -6,12 +6,18 @@
 </head>
 <body>
     <h1>Quiz Results</h1>
-    <p>Your Score: {{ user_score }}</p>
+    {% if user_score is not None %}
+        <p>Your Score: {{ user_score }}</p>
+    {% else %}
+        <p>Score not found. Please check if the quiz was completed correctly.</p>
+    {% endif %}
 
     <h2>All Participants' Scores:</h2>
     <ul>
         {% for answer in all_scores %}
             <li>{{ answer.user_name }}: {{ answer.score }}</li>
+        {% empty %}
+            <li>No scores available for this quiz.</li>
         {% endfor %}
     </ul>
 

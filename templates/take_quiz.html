@@ -30,17 +30,19 @@
     <!-- Quiz questions form -->
     <div id="quiz-form" style="display: none;">
         {% for question in questions %}
-            <div class="question" id="question-{{ forloop.counter0 }}">
+            <div class="question" id="question-{{ question.id }}">
                 <p>{{ question.text }}</p>
-                <button onclick="submitAnswer({{ forloop.counter0 }}, true)">True</button>
-                <button onclick="submitAnswer({{ forloop.counter0 }}, false)">False</button>
+                <button onclick="submitAnswer({{ question.id }}, true)">True</button>
+                <button onclick="submitAnswer({{ question.id }}, false)">False</button>
             </div>
         {% endfor %}
+
     </div>
 
     <script>
         const totalQuestions = {{ questions|length }};
     </script>
+
     <!-- JavaScript functions -->
     <script>
         let currentQuestion = 0;
@@ -74,13 +76,13 @@
             }
         }
 
-        function submitAnswer(index, answer) {
-            // Save the answer and log it
-            answers[`question_${index}`] = answer ? 'True' : 'False';
-            console.log(`Question ${index} answer: ${answers[`question_${index}`]}`);
+        function submitAnswer(questionId, answer) {
+            // Use questionId as the key instead of index
+            answers[`question_${questionId}`] = answer ? 'True' : 'False';
+            console.log(`Question ${questionId} answer: ${answers[`question_${questionId}`]}`);  // Debugging log
 
             // Hide the current question
-            document.getElementById(`question-${index}`).classList.remove("active-question");
+            document.getElementById(`question-${questionId}`).classList.remove("active-question");
 
             // Move to the next question
             currentQuestion++;
@@ -92,15 +94,17 @@
         }
 
 
+
         function finishQuiz() {
             alert("Quiz finished! Redirecting to your results...");
+            console.log("Submitting data:", { user_name: userName, answers: answers });  // Debugging log
 
             // Send the data to the server
             fetch(window.location.href, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'  // Add CSRF token for security
+                    'X-CSRFToken': '{{ csrf_token }}'  // Ensure CSRF token is included
                 },
                 body: JSON.stringify({
                     user_name: userName,
@@ -108,16 +112,21 @@
                 })
             }).then(response => response.json())
               .then(data => {
+                  console.log("Server response:", data);  // Debugging log
                   if (data.success) {
                       window.location.href = data.redirect_url;  // Redirect to the results page
                   } else {
                       alert("An error occurred. Please try again.");
                   }
+              })
+              .catch(error => {
+                  console.error("Error:", error);  // Log any errors
+                  alert("Failed to submit quiz answers. Please try again.");
               });
         }
 
+
+
     </script>
-
-
 </body>
 </html>
