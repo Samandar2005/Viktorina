@@ -1,0 +1,141 @@
+/* styles.css */
+
+/* General Body Styling */
+body {
+    background-color: #f8f9fa;
+    color: #333;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Container for Quiz Pages */
+.quiz-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Header Styling */
+h1, h2 {
+    color: #007bff;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Form Styling */
+form {
+    margin-top: 20px;
+}
+
+input[type="text"], input[type="email"], select {
+    width: 100%;
+    padding: 8px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    display: inline-block;
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Question and Answer Buttons */
+.question {
+    display: none;
+    margin-bottom: 20px;
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+}
+.button1{
+    margin: 5px auto;
+    padding: 10px;
+}
+
+
+.active-question {
+    display: block;
+}
+
+.btn-quiz {
+    width: 48%;
+    margin: 2px 1%;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 4px;
+}
+
+.btn-quiz-true {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-quiz-false {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-quiz-true:hover {
+    background-color: #218838;
+}
+
+.btn-quiz-false:hover {
+    background-color: #c82333;
+}
+
+/* Result Page Styling */
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li {
+    background-color: #f1f1f1;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 4px;
+    color: #555;
+}
+
+.alert {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 4px;
+    text-align: center;
+}
+
+/* Quiz Link Styling */
+.quiz-link {
+    font-size: 18px;
+    text-align: center;
+}
+
+.quiz-link a {
+    color: #007bff;
+    font-weight: bold;
+}
+
+.quiz-link a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}

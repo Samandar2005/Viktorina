@@ -1,1 +1,14 @@
-<p>Sizning viktorina linkingiz: <a href="{{ link }}">{{ link }}</a></p>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz Link</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="quiz-container">
+        <p class="quiz-link">Sizning viktorina linkingiz: <a href="{{ link }}">{{ link }}</a></p>
+    </div>
+</body>
+</html>
